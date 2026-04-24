@@ -1,0 +1,57 @@
+/* Target the YouTube Ask (PAyouchat) side panel when it is expanded */
+ytd-engagement-panel-section-list-renderer[target-id="PAyouchat"][visibility="ENGAGEMENT_PANEL_VISIBILITY_EXPANDED"] {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 90vw !important;
+  max-width: 600px !important;
+  height: 80vh !important;
+  max-height: 800px !important;
+  z-index: 9999 !important;
+  background-color: var(--yt-spec-base-background) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 16px !important;
+  margin: 0 !important;
+  right: auto !important;
+  bottom: auto !important;
+  border: 1px solid var(--yt-spec-10-percent-layer) !important;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out !important;
+}
+
+/* Ensure the inner containers fill the new fixed size */
+ytd-engagement-panel-section-list-renderer[target-id="PAyouchat"] #content {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Hide the engagement panel when it's supposed to be hidden so it doesn't stay visible */
+ytd-engagement-panel-section-list-renderer[target-id="PAyouchat"][visibility="ENGAGEMENT_PANEL_VISIBILITY_HIDDEN"] {
+  display: none !important;
+}
+
+/* Add a custom dark backdrop class injected by content.js */
+.yt-ask-modal-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  z-index: 9998 !important; /* Just below the modal */
+  backdrop-filter: blur(4px) !important;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+.yt-ask-modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Prevent body scrolling when the modal is active */
+body.yt-ask-modal-open {
+  overflow: hidden !important;
+}

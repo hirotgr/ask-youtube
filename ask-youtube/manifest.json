@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Ask Modal",
+  "version": "1.0",
+  "description": "Changes the YouTube 'Ask' (質問する) side panel into a centered modal.",
+  "permissions": ["storage"],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "css": ["styles.css"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
