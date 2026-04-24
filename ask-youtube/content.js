@@ -8,6 +8,8 @@
   let autoFillItems = null;
   let currentPanel = null;
   let activeVideoId = '';
+  let autoFilledVideoId = '';
+  let autoSubmittedVideoId = '';
   let pendingAutoSubmit = null;
   let nextAutoSubmitRequestId = 1;
   let pendingSubmitFrame = 0;
@@ -122,6 +124,10 @@
     };
   }
 
+  function hasPendingAutoSubmitFor(videoId) {
+    return Boolean(pendingAutoSubmit && pendingAutoSubmit.videoId === videoId);
+  }
+
   function scheduleVisibleSubmit(requestId, videoId, sendBtn) {
     if (pendingSubmitFrame) return;
 
@@ -140,6 +146,7 @@
         }
 
         pendingAutoSubmit = null;
+        autoSubmittedVideoId = videoId;
         finishAutoFillObservation();
         sendBtn.click();
       });
@@ -155,7 +162,13 @@
     // クリックされた要素が「質問する」ボタン（またはその子要素）であるか確認
     const videoId = getCurrentVideoId();
     if (isAskEntrypoint(e.target) && videoId) {
-      createPendingAutoSubmit(videoId);
+      const hasPendingForVideo = hasPendingAutoSubmitFor(videoId);
+      if (!hasPendingForVideo && autoFilledVideoId !== videoId && autoSubmittedVideoId !== videoId) {
+        createPendingAutoSubmit(videoId);
+      } else if (!hasPendingForVideo) {
+        pendingAutoSubmit = null;
+        clearPendingSubmitFrame();
+      }
       if (currentPanel && currentPanel.getAttribute('visibility') === 'ENGAGEMENT_PANEL_VISIBILITY_EXPANDED') {
         autoFillInput();
       }
@@ -282,6 +295,11 @@
       return;
     }
 
+    if (autoFilledVideoId === currentVideoId && !hasPendingAutoSubmitFor(currentVideoId)) {
+      clearAutoFillState();
+      return;
+    }
+
     if (currentPanel.getAttribute('visibility') !== 'ENGAGEMENT_PANEL_VISIBILITY_EXPANDED') {
       clearAutoFillState();
       return;
@@ -297,8 +315,10 @@
       return;
     }
 
+    let didAutoFill = false;
     if (!input.value) {
       setInputValue(input, text);
+      didAutoFill = true;
     }
 
     focusInputEnd(input);
@@ -306,6 +326,10 @@
     if (input.value !== text) {
       clearAutoFillState();
       return;
+    }
+
+    if (didAutoFill) {
+      autoFilledVideoId = currentVideoId;
     }
 
     if (!autoFillItems.autoSubmit) {
@@ -349,6 +373,8 @@
 
   function resetPanelState() {
     clearAutoFillState();
+    autoFilledVideoId = '';
+    autoSubmittedVideoId = '';
     if (panelObserver) {
       panelObserver.disconnect();
       panelObserver = null;
@@ -395,6 +421,8 @@
 
     isExtensionRunning = false;
     activeVideoId = '';
+    autoFilledVideoId = '';
+    autoSubmittedVideoId = '';
     document.removeEventListener('click', clickHandler, true);
     globalObserver.disconnect();
     if (panelObserver) {
